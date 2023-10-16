@@ -1,0 +1,53 @@
+---
+- name: Install required packages
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+    state: present
+
+- name: Install Python pip for CentOS 7
+  yum:
+    name: python-pip
+    state: present
+  when: ansible_distribution_version is version('7', '<=')
+
+- name: Install Python pip for CentOS 8
+  yum:
+    name: python3-pip
+    state: present
+  when: ansible_distribution_version is version('8', '>=')
+
+- name: Install Docker SDK for Python
+  pip:
+    name: docker
+    state: present
+    executable: "{{ (ansible_distribution_version is version('8', '>=')) | ternary('pip3', 'pip') }}"
+  when: ansible_distribution == "CentOS"
+
+- name: Install requests module
+  pip:
+    name: requests
+    state: present
+
+- name: Add Docker repository
+  yum_repository:
+    name: Docker-ce
+    description: Docker CE Stable
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    enabled: 1
+    gpgcheck: 1
+    gpgkey: https://download.docker.com/linux/centos/gpg
+
+- name: Install Docker
+  yum:
+    name: docker-ce
+    state: present
+
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+

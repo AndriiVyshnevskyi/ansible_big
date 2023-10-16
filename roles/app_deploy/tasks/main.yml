@@ -1,0 +1,13 @@
+---
+- name: Build Docker image
+  docker_image:
+    path: ~/.ansible/cp/roles/tasks/app
+    name: CI:latest
+
+- name: Run application container
+  docker_container:
+    name: app_container
+    image: CI:latest
+    state: started
+    ports:
+      - "80:80"
